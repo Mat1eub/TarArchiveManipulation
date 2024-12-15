@@ -3,5 +3,10 @@
         "activityBar.background": "#5D0926",
         "titleBar.activeBackground": "#820D36",
         "titleBar.activeForeground": "#FFFCFD"
+    },
+    "files.associations": {
+        "*.md": "markdown",
+        "types.h": "c",
+        "stdio.h": "c"
     }
 }

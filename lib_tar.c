@@ -110,6 +110,32 @@ int exists(int tar_fd, char *path) {
  *         any other value otherwise.
  */
 int is_dir(int tar_fd, char *path) {
+    struct posix_header header; 
+    ssize_t read_bytes;
+
+    
+    while ((read_bytes = read(tar_fd, &header, sizeof(struct posix_header))) == sizeof(struct posix_header)) {
+        if (header.name[0] == '\0') {
+            break;
+        }
+
+        if (strcmp(header.name, path) == 0) {
+            // Vérifie si l'entrée est un répertoire.
+            if (header.typeflag == '5') { // '5' indique un répertoire dans les en-têtes POSIX.
+                return 1; 
+            } else {
+                return 0; 
+            }
+        }
+
+        unsigned long file_size = strtoul(header.size, NULL, 8);
+
+        off_t offset = ((file_size + 511) / 512) * 512; 
+        if (lseek(tar_fd, offset, SEEK_CUR) == (off_t)-1) {
+            return 0; 
+        }
+    }
+
     return 0;
 }
 

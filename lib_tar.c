@@ -1,5 +1,5 @@
 #include "lib_tar.h"
-
+#include <errno.h>
 /**
  * Checks whether the archive is valid.
  *
@@ -16,8 +16,48 @@
  *         -3 if the archive contains a header with an invalid checksum value
  */
 int check_archive(int tar_fd) {
+    tar_header_t buffer;
+    unsigned long int header_chksum, calculated_chksum;
+    ssize_t bytes_read;
+
+    // Initialize the position to the top of the file
+    if (lseek(tar_fd, 0, SEEK_SET) == -1) {
+        perror("An error occurred with lseek");
+        return -4;
+    }
+
+    while ((bytes_read = read(tar_fd, &buffer, TAR_HEADER_SIZE)) > 0 && buffer.name[0] != '\0') {
+
+        // Invalid magic value
+        if (strncmp(buffer.magic, TMAGIC, TMAGLEN) != 0){
+            return -1;
+        }
+        // Invalid version value
+        if (strncmp(buffer.version, TVERSION, TVERSLEN) != 0){
+            return -2;
+        }
+        // - Checksum section - 
+        header_chksum = TAR_INT(buffer.chksum);
+        memset(buffer.chksum, ' ', 8);              // Neutralises the chksum field as required by TAR standards
+        calculated_chksum = 0;
+
+        uint8_t *current_byte = (uint8_t *)&buffer;
+        for (size_t i = 0; i < TAR_HEADER_SIZE; i++) {
+            calculated_chksum += current_byte[i];
+        }
+
+        if (header_chksum != calculated_chksum){
+            return -3;
+        }
+    }
+
+    if (bytes_read < 0) {
+        perror("Error reading from file descriptor");
+        return -4;
+    }
     return 0;
 }
+
 
 /**
  * Checks whether an entry exists in the archive.

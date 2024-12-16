@@ -73,17 +73,15 @@ int check_archive(int tar_fd) {
  *         any other value otherwise.
  */
 int exists(int tar_fd, char *path) {
-    struct posix_header header; // Structure représentant un en-tête POSIX.
+    struct posix_header header; 
     ssize_t read_bytes;
 
-    // Parcourt l'archive jusqu'à la fin.
     while ((read_bytes = read(tar_fd, &header, sizeof(struct posix_header))) == sizeof(struct posix_header)) {
-        // Vérifie si nous avons atteint un bloc nul (fin d'archive).
+        // fin d'archive?
         if (header.name[0] == '\0') {
             break;
         }
 
-        // Compare le nom de fichier avec le chemin donné.
         if (strcmp(header.name, path) == 0) {
             return 1; // L'entrée existe.
         }

@@ -148,7 +148,40 @@ int is_dir(int tar_fd, char *path) {
  * @return zero if no entry at the given path exists in the archive or the entry is not a file,
  *         any other value otherwise.
  */
+
 int is_file(int tar_fd, char *path) {
+    struct posix_header header; 
+    ssize_t read_bytes;
+
+    // Positionne le pointeur au début
+    if (lseek(tar_fd, 0, SEEK_SET) == (off_t)-1) {
+        return 0; 
+    }
+
+    // va jusqu'à la fin de l'archive
+    while ((read_bytes = read(tar_fd, &header, sizeof(struct posix_header))) == sizeof(struct posix_header)) {
+        // fin de l'archive? => sortie de la boucle
+        if (header.name[0] == '\0') {
+            break;
+        }
+
+        
+        if (strcmp(header.name, path) == 0) {
+            if (header.typeflag == '0' || header.typeflag == '\0') { 
+                // '0' ou '\0' pour un fichier régulier dans les en-têtes POSIX.
+                return 1; // L'entrée est donc un fichier régulier.
+            } else {
+                return 0; 
+            }
+        }
+
+        unsigned long file_size = strtoul(header.size, NULL, 8);
+
+        off_t offset = ((file_size + 511) / 512) * 512; 
+        if (lseek(tar_fd, offset, SEEK_CUR) == (off_t)-1) {
+            return 0; 
+        }
+    }
     return 0;
 }
 
@@ -160,9 +193,39 @@ int is_file(int tar_fd, char *path) {
  * @return zero if no entry at the given path exists in the archive or the entry is not symlink,
  *         any other value otherwise.
  */
+
 int is_symlink(int tar_fd, char *path) {
+    struct posix_header header; 
+    ssize_t read_bytes;
+
+    if (lseek(tar_fd, 0, SEEK_SET) == (off_t)-1) {
+        return 0; 
+    }
+
+    while ((read_bytes = read(tar_fd, &header, sizeof(struct posix_header))) == sizeof(struct posix_header)) {
+        if (header.name[0] == '\0') {
+            break;
+        }
+        if (strcmp(header.name, path) == 0) {
+            // lien symbolique ? (champs typeflag des en-têtes POSIX)
+            if (header.typeflag == '2') { 
+                // '2' indique un lien symbolique selon la spécification POSIX.
+                return 1; 
+            } else {
+                return 0; 
+            }
+        }
+
+        unsigned long file_size = strtoul(header.size, NULL, 8);
+
+        off_t offset = ((file_size + 511) / 512) * 512; 
+        if (lseek(tar_fd, offset, SEEK_CUR) == (off_t)-1) {
+            return 0; 
+        }
+    }
     return 0;
 }
+
 
 
 /**

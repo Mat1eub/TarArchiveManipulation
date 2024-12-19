@@ -15,6 +15,7 @@ The command `hexedit` gives us a sight of the headers and the content of the fil
 Usage:
 ```bash
 brew install hexedit (for mac users)
+sudo apt-get install hexedit (on debian/ubuntu)
 hexedit <archive_name>.tar
 ```
 

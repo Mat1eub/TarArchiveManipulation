@@ -1,0 +1,17 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     tests
+relocations:
+  - { offsetInCU: 0x26, offset: 0x26, size: 0x8, addend: 0x0, symName: _debug_dump, symObjAddr: 0x0, symBinAddr: 0x100002D24, symSize: 0x19C }
+  - { offsetInCU: 0x48, offset: 0x48, size: 0x8, addend: 0x0, symName: _debug_dump, symObjAddr: 0x0, symBinAddr: 0x100002D24, symSize: 0x19C }
+  - { offsetInCU: 0xCE, offset: 0xCE, size: 0x8, addend: 0x0, symName: _check_archive_test, symObjAddr: 0x19C, symBinAddr: 0x100002EC0, symSize: 0x118 }
+  - { offsetInCU: 0x12A, offset: 0x12A, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x2B4, symBinAddr: 0x100002FD8, symSize: 0xB4 }
+  - { offsetInCU: 0x26, offset: 0x215, size: 0x8, addend: 0x0, symName: _check_archive, symObjAddr: 0x0, symBinAddr: 0x10000308C, symSize: 0x22C }
+  - { offsetInCU: 0x93, offset: 0x282, size: 0x8, addend: 0x0, symName: _check_archive, symObjAddr: 0x0, symBinAddr: 0x10000308C, symSize: 0x22C }
+  - { offsetInCU: 0x12D, offset: 0x31C, size: 0x8, addend: 0x0, symName: _exists, symObjAddr: 0x22C, symBinAddr: 0x1000032B8, symSize: 0x134 }
+  - { offsetInCU: 0x1A9, offset: 0x398, size: 0x8, addend: 0x0, symName: _is_dir, symObjAddr: 0x360, symBinAddr: 0x1000033EC, symSize: 0x150 }
+  - { offsetInCU: 0x225, offset: 0x414, size: 0x8, addend: 0x0, symName: _is_file, symObjAddr: 0x4B0, symBinAddr: 0x10000353C, symSize: 0x18C }
+  - { offsetInCU: 0x2A1, offset: 0x490, size: 0x8, addend: 0x0, symName: _is_symlink, symObjAddr: 0x63C, symBinAddr: 0x1000036C8, symSize: 0x178 }
+  - { offsetInCU: 0x31D, offset: 0x50C, size: 0x8, addend: 0x0, symName: _list, symObjAddr: 0x7B4, symBinAddr: 0x100003840, symSize: 0x268 }
+  - { offsetInCU: 0x3F2, offset: 0x5E1, size: 0x8, addend: 0x0, symName: _read_file, symObjAddr: 0xA1C, symBinAddr: 0x100003AA8, symSize: 0x2A8 }
+...

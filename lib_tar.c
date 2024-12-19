@@ -251,8 +251,50 @@ int is_symlink(int tar_fd, char *path) {
  *         any other value otherwise.
  */
 int list(int tar_fd, char *path, char **entries, size_t *no_entries) {
-    return 0;
+    struct posix_header header; 
+    ssize_t read_bytes;
+    size_t entries_count = 0;
+
+    if (lseek(tar_fd, 0, SEEK_SET) == (off_t)-1) {
+        return 0; 
+    }
+
+    if (!is_dir(tar_fd, path)) {
+        return 0; 
+    }
+
+    while ((read_bytes = read(tar_fd, &header, sizeof(struct posix_header))) == sizeof(struct posix_header)) {
+        if (header.name[0] == '\0') {
+            break;
+        }
+
+        // Vérifie si l'entrée est dans le répertoire spécifié.
+        if (strncmp(header.name, path, strlen(path)) == 0) {
+            // Extrait le chemin relatif après `path`.
+            const char *relative_path = header.name + strlen(path);
+
+            // direct répertoire ou sous dossier ?
+            if (strchr(relative_path, '/') == NULL || relative_path[strlen(relative_path) - 1] == '/') {
+                if (entries_count < *no_entries) {
+                    strncpy(entries[entries_count], header.name, strlen(header.name) + 1);
+                    entries_count++;
+                }
+            }
+        }
+
+        unsigned long file_size = strtoul(header.size, NULL, 8);
+        off_t offset = ((file_size + 511) / 512) * 512; 
+        if (lseek(tar_fd, offset, SEEK_CUR) == (off_t)-1) {
+            return 0; 
+        }
+    }
+
+    *no_entries = entries_count;
+
+    return 1;
 }
+
+
 
 /**
  * Reads a file at a given path in the archive.
@@ -273,5 +315,52 @@ int list(int tar_fd, char *path, char **entries, size_t *no_entries) {
  *
  */
 ssize_t read_file(int tar_fd, char *path, size_t offset, uint8_t *dest, size_t *len) {
-    return 0;
+    struct posix_header header; 
+    ssize_t read_bytes;
+
+    if (lseek(tar_fd, 0, SEEK_SET) == (off_t)-1) {
+        return -1; 
+    }
+
+    while ((read_bytes = read(tar_fd, &header, sizeof(struct posix_header))) == sizeof(struct posix_header)) {
+        if (header.name[0] == '\0') {
+            break;
+        }
+
+        if (strcmp(header.name, path) == 0) {
+            if (header.typeflag != '0' && header.typeflag != '\0') {
+                return -1; 
+            }
+
+            unsigned long file_size = strtoul(header.size, NULL, 8);
+
+            if (offset >= file_size) {
+                return -2; 
+            }
+
+            if (lseek(tar_fd, offset, SEEK_CUR) == (off_t)-1) {
+                return -1; 
+            }
+
+            size_t bytes_left = file_size - offset;
+            size_t bytes_to_read = (*len < bytes_left) ? *len : bytes_left;
+
+            ssize_t bytes_read = read(tar_fd, dest, bytes_to_read);
+            if (bytes_read == -1) {
+                return -1; 
+            }
+
+            *len = bytes_read;
+
+            return bytes_left - bytes_read;
+        }
+
+        unsigned long file_size = strtoul(header.size, NULL, 8);
+        off_t offset = ((file_size + 511) / 512) * 512; 
+        if (lseek(tar_fd, offset, SEEK_CUR) == (off_t)-1) {
+            return -1; 
+        }
+    }
+
+    return -1;
 }

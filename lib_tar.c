@@ -3,6 +3,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdio.h>
+
+
 
 /**
  * Checks whether the archive is valid.
